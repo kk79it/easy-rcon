@@ -36,10 +36,10 @@ async function send(
   _event: IpcMainInvokeEvent,
   command: string
 ): Promise<Response> {
-  let flag = false;
+  const flag = false;
   if (!rcon || !rcon.authenticated)
     return { type: "error", message: "Connection closed" };
-  let res = await rcon.send(command).catch((reason) => {
+  const res = await rcon.send(command).catch((reason) => {
     return `An error has occurred: ${reason}`;
   });
   return { type: flag ? "error" : "success", message: res };

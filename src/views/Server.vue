@@ -11,14 +11,20 @@
           color="grey lighten-3"
         >
           <v-list>
-            <v-list-item v-for="item in items" :key="item.title" link>
+            <v-list-item link>
               <v-list-item-icon>
-                <v-icon>{{ item.icon }}</v-icon>
+                <v-icon>mdi-view-dashboard</v-icon>
               </v-list-item-icon>
-
-              <v-list-item-content>
-                <v-list-item-title>{{ item.title }}</v-list-item-title>
-              </v-list-item-content>
+            </v-list-item>
+            <v-list-item link>
+              <v-list-item-icon>
+                <v-icon>mdi-image</v-icon>
+              </v-list-item-icon>
+            </v-list-item>
+            <v-list-item link>
+              <v-list-item-icon>
+                <v-icon>mdi-help-box</v-icon>
+              </v-list-item-icon>
             </v-list-item>
           </v-list>
         </v-navigation-drawer>
@@ -50,7 +56,7 @@
             <v-container class="grey lighten-5" height="128" width="100%">
               <v-row>
                 <v-col class="shrink">
-                  <v-btn block color="secondary" @click="start()" outlined>
+                  <v-btn block color="secondary" @click="fetch()" outlined>
                     <v-icon>mdi-cog</v-icon>
                   </v-btn>
                 </v-col>
@@ -89,14 +95,14 @@
 
     <v-navigation-drawer app clipped right v-model="users">
       <v-list>
-        <v-list-item v-for="n in 5" :key="n" link>
+        <v-list-item v-for="(elem, n) in players" :key="n" link>
           <v-list-item-avatar>
             <v-img
               src="https://crafatar.com/avatars/39c5460334fc4c8d987ce22ff13a740e"
             ></v-img>
           </v-list-item-avatar>
           <v-list-item-content>
-            <v-list-item-title>Tasla</v-list-item-title>
+            <v-list-item-title v-text="elem[0]"></v-list-item-title>
             <v-list-item-subtitle
               >39c5460334fc4c8d987ce22ff13a740e</v-list-item-subtitle
             >
@@ -115,18 +121,20 @@
               :color="style.color"
               dense
               border="left"
-              elevation="1"
+              elevation="2"
               colored-border
-              class="mx-5"
+              class="mx-4"
             >
               <code
-                class="font-weight-medium font-code"
+                class="font-code white--text grey"
                 v-text="
                   `[${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}]: ${req}`
                 "
               ></code>
 
-              <pre class="font-code" v-text="res"></pre>
+              <pre
+                class="font-code grey lighten-1 mt-2 pa-1 rounded-sm"
+              ><span v-for="(elem, n) in colorFormat(res)" :key="n" v-text="elem.text" :style="elem.style"></span></pre>
             </v-alert>
           </v-col>
         </v-row>
@@ -162,15 +170,10 @@ export default Vue.extend({
   data: () => ({
     drawer: null,
     users: null,
-    items: [
-      { title: "Dashboard", icon: "mdi-view-dashboard" },
-      { title: "Photos", icon: "mdi-image" },
-      { title: "About", icon: "mdi-help-box" },
-    ],
     authenticated: false,
     command: "",
     messages: [] as any[],
-    show: false,
+    players: [] as any[],
   }),
   methods: {
     async start() {
@@ -181,7 +184,7 @@ export default Vue.extend({
       });
       if (this.authenticated) {
         this.messages.push([
-          { color: "success" },
+          { color: "yellow" },
           "System",
           "Started Connection",
           new Date(),
@@ -200,14 +203,14 @@ export default Vue.extend({
       this.authenticated = await ipcRenderer.invoke("stop");
       if (!this.authenticated) {
         this.messages.push([
-          { color: "cyan" },
+          { color: "red" },
           "System",
           "Connection closed",
           new Date(),
         ]);
       } else {
         this.messages.push([
-          { color: "cyan" },
+          { color: "red" },
           "System",
           "Invaild connection closed",
           new Date(),
@@ -227,6 +230,37 @@ export default Vue.extend({
       ]);
       this.command = "";
     },
+
+    async fetch() {
+      let res = await ipcRenderer.invoke("send", "list");
+      this.players = [];
+      res.message
+        .split(":")[1]
+        .split(", ")
+        .forEach((val: string) => {
+          this.players.push([val]);
+        });
+    },
+
+    colorFormat(text: string): CodeElement[] {
+      return text.split("§").map((val) => {
+        let style = colors[val.slice(0, 1) as keyof typeof colors];
+        if (~text.indexOf("§") && style) {
+          return {
+            style: {
+              color: style[0],
+              "text-shadow": `1px 1px 1px ${style[1]}`,
+            },
+            text: val.slice(1),
+          };
+        } else {
+          return {
+            style: { color: "#FFFFFF", "text-shadow": "1px 1px 1px #3F3F3F" },
+            text: val,
+          };
+        }
+      });
+    },
   },
 
   watch: {
@@ -235,4 +269,28 @@ export default Vue.extend({
     },
   },
 });
+
+let colors = {
+  "0": ["#000000", "#000000"],
+  "1": ["#0000AA", "#00002A"],
+  "2": ["#00AA00", "#002A00"],
+  "3": ["#00AAAA", "#002A2A"],
+  "4": ["#AA0000", "#2A0000"],
+  "5": ["#AA00AA", "#2A002A"],
+  "6": ["#FFAA00", "#2A2A00"],
+  "7": ["#AAAAAA", "#2A2A2A"],
+  "8": ["#555555", "#151515"],
+  "9": ["#5555FF", "#15153F"],
+  a: ["#55FF55", "#153F15"],
+  b: ["#55FFFF", "#153F3F"],
+  c: ["#FF5555", "#3F1515"],
+  d: ["#FF55FF", "#3F153F"],
+  e: ["#FFFF55", "#3F3F15"],
+  f: ["#FFFFFF", "#3F3F3F"],
+};
+
+interface CodeElement {
+  style: { color: string; "text-shadow": string };
+  text: string;
+}
 </script>

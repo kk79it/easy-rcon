@@ -13,6 +13,7 @@
   },
   "main": "background.js",
   "dependencies": {
+    "axios": "^0.22.0",
     "core-js": "^3.6.5",
     "rcon-client": "^4.2.3",
     "vue": "^2.6.11",

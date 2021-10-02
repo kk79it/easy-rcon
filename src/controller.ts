@@ -1,3 +1,4 @@
+import axios from "axios";
 import { ipcMain, IpcMainInvokeEvent } from "electron";
 import { Rcon, RconOptions } from "rcon-client";
 
@@ -5,6 +6,7 @@ export function register() {
   ipcMain.handle("start", start);
   ipcMain.handle("stop", stop);
   ipcMain.handle("send", send);
+  ipcMain.handle("fetch", fetch);
 }
 
 let rcon: Rcon | undefined;
@@ -43,6 +45,13 @@ async function send(
     return `An error has occurred: ${reason}`;
   });
   return { type: flag ? "error" : "success", message: res };
+}
+
+async function fetch(_event: IpcMainInvokeEvent, name: string) {
+  let uuid: { id: string } = (
+    await axios.get(`https://api.mojang.com/users/profiles/minecraft/${name}`)
+  ).data;
+  return uuid.id;
 }
 
 interface Response {

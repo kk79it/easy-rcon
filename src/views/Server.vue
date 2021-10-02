@@ -95,17 +95,13 @@
 
     <v-navigation-drawer app clipped right v-model="users">
       <v-list>
-        <v-list-item v-for="(elem, n) in players" :key="n" link>
+        <v-list-item v-for="([name, uuid, icon], n) in players" :key="n" link>
           <v-list-item-avatar>
-            <v-img
-              src="https://crafatar.com/avatars/39c5460334fc4c8d987ce22ff13a740e"
-            ></v-img>
+            <v-img :src="icon"></v-img>
           </v-list-item-avatar>
           <v-list-item-content>
-            <v-list-item-title v-text="elem[0]"></v-list-item-title>
-            <v-list-item-subtitle
-              >39c5460334fc4c8d987ce22ff13a740e</v-list-item-subtitle
-            >
+            <v-list-item-title v-text="name"></v-list-item-title>
+            <v-list-item-subtitle v-text="uuid"></v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -165,6 +161,7 @@
 <script lang="ts">
 import Vue from "vue";
 import { ipcRenderer } from "electron";
+import axios from "axios";
 
 export default Vue.extend({
   data: () => ({
@@ -189,6 +186,7 @@ export default Vue.extend({
           "Started Connection",
           new Date(),
         ]);
+        await this.fetch();
       } else {
         this.messages.push([
           { color: "error" },
@@ -235,10 +233,15 @@ export default Vue.extend({
       let res = await ipcRenderer.invoke("send", "list");
       this.players = [];
       res.message
-        .split(":")[1]
+        .split(": ")[1]
         .split(", ")
-        .forEach((val: string) => {
-          this.players.push([val]);
+        .forEach(async (name: string) => {
+          let uuid = await ipcRenderer.invoke("fetch", name);
+          this.players.push([
+            name,
+            uuid,
+            `https://crafatar.com/avatars/${uuid}`,
+          ]);
         });
     },
 

@@ -48,10 +48,15 @@ async function send(
 }
 
 async function fetch(_event: IpcMainInvokeEvent, name: string) {
-  let uuid: { id: string } = (
-    await axios.get(`https://api.mojang.com/users/profiles/minecraft/${name}`)
-  ).data;
-  return uuid.id;
+  if (!rcon || !rcon.authenticated) return;
+  try {
+    let uuid: { name: string; id: string } = (
+      await axios.get(`https://api.mojang.com/users/profiles/minecraft/${name}`)
+    ).data;
+    return uuid.id;
+  } catch (error) {
+    return;
+  }
 }
 
 interface Response {

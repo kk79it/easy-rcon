@@ -122,15 +122,13 @@
               class="mx-4"
             >
               <code
-                class="font-code white--text grey"
+                class="font-code"
                 v-text="
                   `[${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}]: ${req}`
                 "
               ></code>
 
-              <pre
-                class="font-code grey lighten-1 mt-2 pa-1 rounded-sm"
-              ><span v-for="(elem, n) in colorFormat(res)" :key="n" v-text="elem.text" :style="elem.style"></span></pre>
+              <pre class="font-code mt-2 pa-1 rounded-sm" v-text="res"></pre>
             </v-alert>
           </v-col>
         </v-row>
@@ -223,7 +221,7 @@ export default Vue.extend({
       this.messages.push([
         { color: "cyan" },
         this.command,
-        res.message,
+        res.message.replace(/§./g, ""),
         new Date(),
       ]);
       this.command = "";
@@ -231,69 +229,30 @@ export default Vue.extend({
 
     async fetch() {
       let res = await ipcRenderer.invoke("send", "list");
-      this.players = [];
-      res.message
-        .split(": ")[1]
-        .split(", ")
-        .forEach(async (name: string) => {
-          let uuid = await ipcRenderer.invoke("fetch", name);
-          this.players.push([
-            name,
-            uuid,
-            `https://crafatar.com/avatars/${uuid}`,
-          ]);
-        });
-    },
-
-    colorFormat(text: string): CodeElement[] {
-      return text.split("§").map((val) => {
-        let style = colors[val.slice(0, 1) as keyof typeof colors];
-        if (~text.indexOf("§") && style) {
-          return {
-            style: {
-              color: style[0],
-              "text-shadow": `1px 1px 1px ${style[1]}`,
-            },
-            text: val.slice(1),
-          };
-        } else {
-          return {
-            style: { color: "#FFFFFF", "text-shadow": "1px 1px 1px #3F3F3F" },
-            text: val,
-          };
-        }
-      });
+      this.players = getPlayers(res.message);
     },
   },
 
   watch: {
     messages() {
       this.$vuetify.goTo(document.body.scrollHeight, { duration: 0 });
+      console.log(document.body.scrollHeight);
     },
   },
 });
 
-let colors = {
-  "0": ["#000000", "#000000"],
-  "1": ["#0000AA", "#00002A"],
-  "2": ["#00AA00", "#002A00"],
-  "3": ["#00AAAA", "#002A2A"],
-  "4": ["#AA0000", "#2A0000"],
-  "5": ["#AA00AA", "#2A002A"],
-  "6": ["#FFAA00", "#2A2A00"],
-  "7": ["#AAAAAA", "#2A2A2A"],
-  "8": ["#555555", "#151515"],
-  "9": ["#5555FF", "#15153F"],
-  a: ["#55FF55", "#153F15"],
-  b: ["#55FFFF", "#153F3F"],
-  c: ["#FF5555", "#3F1515"],
-  d: ["#FF55FF", "#3F153F"],
-  e: ["#FFFF55", "#3F3F15"],
-  f: ["#FFFFFF", "#3F3F3F"],
-};
-
-interface CodeElement {
-  style: { color: string; "text-shadow": string };
-  text: string;
+function getPlayers(res: string): any[] {
+  let players: any[] = [];
+  if (!~res.indexOf(": ")) return players;
+  res
+    .split(": ")[1]
+    .split(", ")
+    .forEach(async (name: string) => {
+      let uuid = await ipcRenderer.invoke("fetch", name);
+      if (uuid) {
+        players.push([name, uuid, `https://crafatar.com/avatars/${uuid}`]);
+      }
+    });
+  return players;
 }
 </script>

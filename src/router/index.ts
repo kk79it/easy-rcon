@@ -1,4 +1,3 @@
-import { register } from "@/controller";
 import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 
@@ -7,27 +6,14 @@ Vue.use(VueRouter);
 const routes: Array<RouteConfig> = [
   {
     path: "/",
-    name: "Start",
-    component: () => import("@/views/Start.vue"),
-  },
-  {
-    path: "/server/:id",
-    name: "Server",
-    component: () => import("@/views/Server.vue"),
+    redirect: "/servers",
   },
   {
     path: "/servers",
-    component: () => import("@/views/Servers.vue"),
-    children: [
-      {
-        path: "",
-        component: () => import("@/components/Chart.vue"),
-      },
-    ],
+    component: () => import("@/views/Chart.vue"),
   },
   {
     path: "/servers/:id",
-    name: "Servers",
     props: true,
     component: () => import("@/views/Servers.vue"),
     children: [

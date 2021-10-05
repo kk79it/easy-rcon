@@ -50,7 +50,7 @@ async function send(
 async function fetch(_event: IpcMainInvokeEvent, name: string) {
   if (!rcon || !rcon.authenticated) return;
   try {
-    let uuid: { name: string; id: string } = (
+    const uuid: { name: string; id: string } = (
       await axios.get(`https://api.mojang.com/users/profiles/minecraft/${name}`)
     ).data;
     return uuid.id;

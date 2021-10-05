@@ -159,7 +159,6 @@
 <script lang="ts">
 import Vue from "vue";
 import { ipcRenderer } from "electron";
-import axios from "axios";
 
 export default Vue.extend({
   data: () => ({

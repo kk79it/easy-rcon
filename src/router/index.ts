@@ -1,3 +1,4 @@
+import { register } from "@/controller";
 import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 
@@ -7,12 +8,42 @@ const routes: Array<RouteConfig> = [
   {
     path: "/",
     name: "Start",
-    component: () => import("../views/Start.vue"),
+    component: () => import("@/views/Start.vue"),
   },
   {
     path: "/server/:id",
     name: "Server",
-    component: () => import("../views/Server.vue"),
+    component: () => import("@/views/Server.vue"),
+  },
+  {
+    path: "/servers",
+    component: () => import("@/views/Servers.vue"),
+    children: [
+      {
+        path: "",
+        component: () => import("@/components/Chart.vue"),
+      },
+    ],
+  },
+  {
+    path: "/servers/:id",
+    name: "Servers",
+    props: true,
+    component: () => import("@/views/Servers.vue"),
+    children: [
+      {
+        path: "console",
+        component: () => import("@/components/Console.vue"),
+      },
+      {
+        path: "settings",
+        component: () => import("@/components/Settings.vue"),
+      },
+      {
+        path: "",
+        redirect: "console",
+      },
+    ],
   },
 ];
 

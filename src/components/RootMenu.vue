@@ -1,5 +1,10 @@
 <template>
-  <v-navigation-drawer :app="absolute" color="grey lighten-3" width="64">
+  <v-navigation-drawer
+    :app="absolute"
+    color="grey lighten-3"
+    width="64"
+    permanent
+  >
     <router-link
       exact-active-class="selected"
       to="/servers"
@@ -16,7 +21,7 @@
       <router-link
         active-class="selected"
         :key="elem.id"
-        :to="`/servers/${elem.id}`"
+        :to="`/servers/${elem.host}:${elem.port}`"
         class="d-block ma-2"
       >
         <v-avatar>

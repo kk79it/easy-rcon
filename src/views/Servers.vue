@@ -2,17 +2,17 @@
   <v-app id="inspire">
     <system-bar></system-bar>
 
-    <v-navigation-drawer floating hide-overlay app width="314">
+    <v-navigation-drawer permanent floating hide-overlay app width="314">
       <v-layout fill-height>
         <root-menu></root-menu>
-        <server-menu :id="id"></server-menu>
+        <server-menu :id="key"></server-menu>
       </v-layout>
     </v-navigation-drawer>
 
     <v-app-bar app clipped-right flat dense>
       <v-app-bar-nav-icon></v-app-bar-nav-icon>
 
-      <v-toolbar-title v-text="id"></v-toolbar-title>
+      <v-toolbar-title v-text="key"></v-toolbar-title>
 
       <v-spacer></v-spacer>
 
@@ -21,7 +21,7 @@
       </v-btn>
     </v-app-bar>
 
-    <v-navigation-drawer app clipped right>
+    <v-navigation-drawer permanent app clipped right>
       <v-list>
         <!-- <v-list-item v-for="([name, uuid, icon], n) in players" :key="n" link>
         <v-list-item-avatar>
@@ -54,14 +54,11 @@ export default Vue.extend({
   }),
 
   props: {
-    id: {
-      type: String,
-      default: "root",
-    },
+    id: String,
   },
 
   computed: {
-    itemsTab() {
+    itemsTab(): { text: string; icon: string; to: string }[] {
       return [
         {
           text: "Console",
@@ -76,8 +73,17 @@ export default Vue.extend({
       ];
     },
 
-    servers(): Server[] {
-      return store.state.servers;
+    details(): Server | undefined {
+      return store.state.servers.find(
+        ({ host, port }) => `${host}:${port}` === this.id
+      );
+    },
+
+    key(): string | undefined {
+      if (this.details) {
+        return `${this.details.host}:${this.details.port}`;
+      }
+      return undefined;
     },
   },
 
@@ -89,7 +95,6 @@ export default Vue.extend({
 });
 
 interface Server {
-  id: string;
   host: string;
   port: number;
   password: string;

@@ -20,10 +20,12 @@ const routes: Array<RouteConfig> = [
       {
         path: "console",
         component: () => import("@/components/Console.vue"),
+        props: true,
       },
       {
         path: "settings",
         component: () => import("@/components/Settings.vue"),
+        props: true,
       },
       {
         path: "",
